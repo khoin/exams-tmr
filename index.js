@@ -11,12 +11,12 @@ var s = 1/12;
 import envelope from 'opendsp/envelope';
 import Delay from 'opendsp/delay';
 
-var del = Delay();
+var del = Delay(2056*10);
 
 
 var kick_seq =  [1,0,0,0.3,1,0,0.3,0,1,0,0,0.3,1,0,0.3,0];
 var snare_seq=  [0,0,0,0.0,1,0,0.0,0,0,0,0,0.0,1,0,0.0,0];
-var synth_seq=  [0,0,0.5,0.7,0,0,0,0,0,0,0.5,0.7,0,0,0,0];
+var synth_seq=  [0.07,0.5,0.5,0.5];
 var synth_not=  [440,880,660,1010];
 
 export function dsp(t) {
@@ -26,12 +26,13 @@ export function dsp(t) {
   var kick_out = seq(t,1/16,b,kick_seq) * kick(t,3.5,190,b/16);
   var snare_out= seq(t,1/16,b,snare_seq)* noise() * envelope(t,b/16,8,100);
   var note     = seq(t,1,b,synth_not);
-  var synth    = seq(t,1/16,b,synth_seq)* sqr(t, 0.5*note*gl, 0.7);
+  var synth    = seq(t,1/16,b,synth_seq)* sqr(t, 0.25*note*gl, 0.7);
   
   var out = kick_out
   + snare_out
-  + synth * 0.3
-  + Math.abs(del.feedback(0.3).delay(256).run(synth));
+  + synth * 0.0
+  + (envelope(t,b/16,10,8)-1) 
+  * del.feedback(0.2).delay(2048*4).run(synth)
   ;
   
   return out;
